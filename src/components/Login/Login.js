@@ -1,21 +1,56 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Login.css'; 
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import './Login.css';
+import auth from '../../firebase_init'
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 
 const Login = () => {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [
+        signInWithEmailAndPassword,
+        user,
+        loading,
+        error,
+    ] = useSignInWithEmailAndPassword(auth);
+
+    const navigat = useNavigate()
+
+    const handleEmailBlur = event => {
+        setEmail(event.target.value)
+    }
+    const handlePasswordBlur = event => {
+        setPassword(event.target.value)
+    }
+    const handleFormSubmit = event => {
+        event.preventDefault()
+        signInWithEmailAndPassword(email, password)
+        console.log('Sign In Successfuly.');
+        }
+    if (error) {
+        console.log(error.message);
+    }
+  
+    const location = useLocation();
+    const from = location.state?.from?.pathname || '/';
+    if (user) {
+        navigat(from, { replace: true });
+    }
+
     return (
         <div className="form-container">
             <div>
                 <h1 className='form-title'>Login</h1>
-                <form>
+                <form onSubmit={handleFormSubmit}>
                     <div className="form-group">
                         <label htmlFor="email">Email</label>
-                        <input type="email" name="Email" id="" required />
+                        <input onBlur={handleEmailBlur} type="email" name="Email" id="email" required />
                     </div>
                     <div className="form-group">
                         <label htmlFor="password">Passowrd</label>
-                        <input type="password" name="Password" id="" required />
+                        <input onBlur={handlePasswordBlur} type="password" name="Password" id="password" required />
                     </div>
+                    <p style={{color: 'red'}}>{error && error.message}</p>
                     <input className='form-submit' type="submit" value="Login" />
                 </form>
                 <p className='form-link'>
